@@ -1,6 +1,6 @@
 import { prisma } from "../../db.config.js";
 
-/* BBox 내 식당 조회 */
+/* BBox 내 식당 조회 레포지토리 */
 export const findByBBox = async ({
   minLng,
   minLat,
@@ -29,37 +29,7 @@ export const findByBBox = async ({
   });
 };
 
-/* 반경 내 식당 조회 (PostgreSQL 기준, Haversine) */
-export const findNearby = async ({ lng, lat, radius = 1500, limit = 200 }) => {
-  // Prisma의 $queryRaw`...` 태그는 파라미터 바인딩되어 SQL 인젝션 안전
-  return prisma.$queryRaw`
-    SELECT
-      id,
-      name,
-      category,
-      address,
-      telephone,
-      mapx,
-      mapy,
-      is_sponsored AS "isSponsored",
-      avg_score   AS "avgScore",
-      (6371000 * acos(
-        cos(radians(${lat})) * cos(radians(mapy)) *
-        cos(radians(mapx) - radians(${lng})) +
-        sin(radians(${lat})) * sin(radians(mapy))
-      )) AS distance
-    FROM restaurants
-    HAVING (6371000 * acos(
-      cos(radians(${lat})) * cos(radians(mapy)) *
-      cos(radians(mapx) - radians(${lng})) +
-      sin(radians(${lat})) * sin(radians(mapy))
-    )) <= ${radius}
-    ORDER BY "isSponsored" DESC, "avgScore" DESC
-    LIMIT ${Math.min(Number(limit) || 200, 500)}
-  `;
-};
-
-/* 식당 상세 */
+/* 식당 상세 조회 레포지토리 */
 export const findRestaurantById = async (id) => {
   return prisma.restaurant.findUnique({
     where: { id },
@@ -77,14 +47,14 @@ export const findRestaurantById = async (id) => {
   });
 };
 
-/* 리뷰 개수 */
+/* 리뷰 개수 조회 레포지토리 */
 export const countReviewsByRestaurant = async (restaurantId) => {
   return prisma.review.count({
     where: { restaurantId },
   });
 };
 
-/* 리뷰 목록 */
+/* 리뷰 목록 조회 레포지토리 */
 export const findReviewsByRestaurant = async ({
   restaurantId,
   page = 1,

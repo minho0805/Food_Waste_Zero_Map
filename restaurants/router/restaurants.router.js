@@ -13,7 +13,7 @@ const r = Router();
   #swagger.security = [{ bearerAuth: [] }]
 */
 
-/* 지도 영역 내 식당 조회 */
+/* 지도 영역 내 식당 조회 라우터 */
 r.get(
   "/",
   /*

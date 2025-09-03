@@ -46,27 +46,10 @@ export const getRestaurantsByBBox = async (query) => {
   };
 };
 
-/* 반경 내 식당 (선택) */
-export const getRestaurantsNearby = async (query) => {
-  const lng = toNum(query.lng);
-  const lat = toNum(query.lat);
-  const radius = toNum(query.radius, 1500);
-  const limit = toNum(query.limit, 200);
-
-  if (![lng, lat].every((v) => typeof v === "number"))
-    throw new Error("Invalid lng/lat");
-
-  const rows = await findNearby({ lng, lat, radius, limit });
-  return {
-    items: rows.map(toRestaurantItemDto),
-    count: rows.length,
-  };
-};
-
-/* 상세 */
+/* 식당 상세 조회 서비스 */
 export const getRestaurantDetail = async (id) => {
   const restaurant = await findRestaurantById(id);
-  if (!restaurant) throw new Error("Restaurant not found");
+  if (!restaurant) throw new Error("식당을 찾을 수 없습니다.");
 
   const reviewsCount = await countReviewsByRestaurant(id);
   return toRestaurantDetailDto({ ...restaurant, reviewCount: reviewsCount });
