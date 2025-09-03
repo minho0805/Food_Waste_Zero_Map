@@ -1,42 +1,53 @@
 import { StatusCodes } from "http-status-codes";
-import * as svc from "../service/restaurants.service.js";
+import {
+  getRestaurantsByBBox,
+  getRestaurantsNearby,
+  getRestaurantDetail,
+  getRestaurantReviews,
+} from "../service/restaurants.service.js";
 
-
-/* 식당 조회
- * 매서드: GET
- * 엔드포인트: /api/restaurants
- */
-export async function listRestaurants(req, res, next) {
+/* 지도 Box 내 식당 조회 */
+export const listByBBox = async (req, res, next) => {
   try {
-    const dto = parseListQuery(req.query);
-    const restaurants = await svc.list(dto);
-    return res.success(restaurants, StatusCodes.OK);
+    const result = await getRestaurantsByBBox(req.query);
+    return res.success(result, StatusCodes.OK);
   } catch (e) {
     next(e);
   }
-}
+};
 
-/* 식당 상세조회
- * 매서드: GET
- * 엔드포인트: /api/restaurants/:restaurant_id
- */
-export async function getRestaurantDetail(req, res, next) {
+/* 반경 내 식당 조회 (선택) */
+export const listNearby = async (req, res, next) => {
   try {
-    const { restaurantId } = parserestaurantIDParam(req.params);
-    const restaurants = await svc.detail(restaurantId);
-    return res.success(restaurants, StatusCodes.OK);
+    const result = await getRestaurantsNearby(req.query);
+    return res.success(result, StatusCodes.OK);
   } catch (e) {
     next(e);
   }
-}
+};
 
-/* 특정 식당 리뷰 조회
- * 매서드: GET
- * 엔드포인트: /api/restaurants/:restaurant_id/reviews
- */
- export async function listRestaurantReviews(req, res, next) {
-   try {
-     const { restaurantId } = parserestaurantIDParam(req.params);
-     const res.success(restaurants, StatusCodes.OK);
-   }
- }
+/* 식당 상세 조회 */
+export const detail = async (req, res, next) => {
+  try {
+    const id = Number(req.params.restaurantId);
+    if (!Number.isInteger(id) || id <= 0)
+      throw new Error("Invalid restaurantId");
+    const result = await getRestaurantDetail(id);
+    return res.success(result, StatusCodes.OK);
+  } catch (e) {
+    next(e);
+  }
+};
+
+/* 특정 식당 리뷰 조회 */
+export const reviews = async (req, res, next) => {
+  try {
+    const restaurantId = Number(req.params.restaurantId);
+    if (!Number.isInteger(restaurantId) || restaurantId <= 0)
+      throw new Error("Invalid restaurantId");
+    const result = await getRestaurantReviews(restaurantId, req.query);
+    return res.success(result, StatusCodes.OK);
+  } catch (e) {
+    next(e);
+  }
+};

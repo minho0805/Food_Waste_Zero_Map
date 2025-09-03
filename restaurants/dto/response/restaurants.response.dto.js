@@ -1,8 +1,4 @@
-// 위치: src/restaurants/dto/response/restaurants.response.js
-
-/**
- * 식당 목록/상세 응답 DTO
- */
+/** 식당 목록/상세 공용 DTO */
 export function toRestaurantItemDto(r) {
   return {
     id: r.id,
@@ -12,22 +8,38 @@ export function toRestaurantItemDto(r) {
     telephone: r.telephone ?? null,
     mapx: r.mapx ?? null,
     mapy: r.mapy ?? null,
-    isSponsored: !!r.isSponsored,
-    distance: r.distance ?? undefined, // 근처 검색일 경우(m 단위)
-    stats: r._stats
-      ? {
-          reviewCount: r._stats.reviewCount ?? 0,
-          avgLeftoverRatio: r._stats.avgLeftoverRatio ?? null,
-          avgScore: r._stats.avgScore ?? null,
-        }
-      : undefined,
+    isSponsored: !!(r.isSponsored ?? r.is_sponsored),
+    distance: r.distance ?? undefined, // nearby에서만 존재(m)
+    stats:
+      r.reviewCount !== undefined ||
+      r.avgLeftoverRatio !== undefined ||
+      r.avgScore !== undefined
+        ? {
+            reviewCount: r.reviewCount ?? 0,
+            avgLeftoverRatio: r.avgLeftoverRatio ?? null,
+            avgScore: r.avgScore ?? null,
+          }
+        : undefined,
+    avgScore: r.avgScore ?? r.avg_score ?? null,
   };
 }
 
-/**
- * 상세조회용 DTO
- * (현재는 동일하지만, 추후 메뉴/영업시간 등 확장 가능)
- */
-export function toRestaurantDetailDto(r) {
-  return toRestaurantItemDto(r);
+/** 상세 조회 DTO (현재는 동일) */
+export const toRestaurantDetailDto = toRestaurantItemDto;
+
+/** 리뷰 DTO(간단) */
+export function toReviewItemDto(rv) {
+  return {
+    id: rv.id,
+    content: rv.content,
+    score: rv.score,
+    createdAt: rv.createdAt,
+    user: rv.user
+      ? {
+          id: rv.user.id,
+          nickname: rv.user.nickname,
+          profile: rv.user.profile,
+        }
+      : null,
+  };
 }
